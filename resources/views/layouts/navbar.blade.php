@@ -1,19 +1,10 @@
 <nav class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-8 lg:px-12">
         <div class="flex justify-between items-center h-20">
             
             <div class="flex items-center gap-10">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 group">
-                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 border border-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect x="5" y="3" width="14" height="18" rx="2" ry="2"></rect>
-                            <path d="M5 7h14"></path>
-                            <circle cx="12" cy="14" r="4"></circle>
-                        </svg>
-                    </div>
-                    <span class="text-2xl font-black text-gray-900 tracking-tight">
-                        Laundry<span class="text-blue-600">Q</span>
-                    </span>
+                <a href="{{ route('home') }}" class="flex items-center group">
+                    <img src="{{ asset('img/logo.png') }}" alt="LaundryQ Logo" class="h-13 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
                 </a>
                 
                 <div class="hidden md:flex items-center gap-1">

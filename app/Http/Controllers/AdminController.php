@@ -9,11 +9,28 @@ use App\Models\TrackingLog;
 class AdminController extends Controller
 {
     // Menampilkan Dashboard Admin
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        // Ambil semua data booking beserta relasinya, urutkan dari yang terbaru
-        $bookings = Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc')->get();
-        return view('admin.dashboard', compact('bookings'));
+        // 1. Siapkan query dasar (ambil semua data dari yang terbaru)
+        $query = \App\Models\Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
+
+        // 2. FITUR FILTER: Cek apakah ada klik dari sidebar?
+        if ($request->has('service')) {
+            $filter = $request->service;
+            // Saring tabel berdasarkan nama layanan yang diklik
+            $query->whereHas('service', function($q) use ($filter) {
+                $q->where('service_name', 'like', '%' . $filter . '%');
+            });
+        }
+
+        // 3. Eksekusi query
+        $bookings = $query->get();
+
+        // (Opsional) Biar statistik Kotak Atas tetep ngitung semua antrean meskipun lagi difilter:
+        $allBookings = \App\Models\Booking::all(); 
+        
+        // RETURN-NYA CUKUP SATU AJA DI PALING BAWAH SINI 👇
+        return view('admin.dashboard', compact('bookings', 'allBookings'));
     }
 
     // Memperbarui Status, Berat, dan Harga

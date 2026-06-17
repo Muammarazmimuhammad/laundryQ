@@ -36,7 +36,8 @@ class AuthController extends Controller
         // Langsung login setelah register
         Auth::login($user);
 
-        return redirect()->route('booking.create')->with('success', 'Registrasi berhasil! Silakan pesan antrean.');
+        // Lempar langsung ke Dashboard Pelanggan
+        return redirect()->route('user.dashboard')->with('success', 'Registrasi berhasil! Selamat datang di LaundryQ.');
     }
 
     // --- LOGIN ---
@@ -59,7 +60,9 @@ class AuthController extends Controller
             if (Auth::user()->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
-            return redirect()->route('booking.create');
+            
+            // Paksa lempar ke Dashboard Pelanggan (Halaman Kotak AdminLTE)
+            return redirect()->route('user.dashboard');
         }
 
         return back()->withErrors([

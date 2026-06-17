@@ -14,4 +14,5 @@ class TrackingLog extends Model
 
     // Daftarkan kolom yang boleh diisi
     protected $fillable = ['booking_id', 'status', 'description'];
+    protected $guarded = [];
 }

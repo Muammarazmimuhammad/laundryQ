@@ -11,26 +11,48 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    // Menampilkan halaman form booking
     public function create()
     {
         $services = Service::all();
         
-        $slots = LaundrySlot::where('available_date', '>=', now()->toDateString())
+        $daysToGenerate = 3;
+        $defaultSlots = ['08:00 - 10:00', '10:00 - 12:00', '13:00 - 15:00', '15:00 - 17:00'];
+
+        for ($i = 0; $i < $daysToGenerate; $i++) {
+
+            $date = now('Asia/Jakarta')->addDays($i)->toDateString(); 
+
+            $exists = LaundrySlot::where('available_date', $date)->exists();
+
+            if (!$exists) {
+                foreach ($defaultSlots as $time) {
+                    LaundrySlot::create([
+                        'available_date' => $date,
+                        'time_slot' => $time,
+                        'max_quota' => 5,
+                        'current_quota' => 0
+                    ]);
+                }
+            }
+        }
+
+        // 2. PAKSA juga timezone Jakarta di dalam query filter agar akurat memakai tanggal 16
+        $slots = LaundrySlot::where('available_date', '>=', now('Asia/Jakarta')->toDateString())
                     ->whereColumn('current_quota', '<', 'max_quota')
+                    ->orderBy('available_date', 'asc')
+                    ->orderBy('time_slot', 'asc')
                     ->get();
 
-        // TAMBAHAN: Ambil riwayat pesanan khusus user yang sedang login
         $bookings = Booking::with(['service', 'slot', 'trackingLogs' => function($query) {
-            $query->orderBy('id', 'desc'); 
+            $query->orderBy('changed_at', 'desc'); 
         }])
         ->where('user_id', Auth::id())
         ->orderBy('created_at', 'desc')
         ->get();
 
-        // Lempar data services, slots, dan bookings ke halaman
         return view('booking.create', compact('services', 'slots', 'bookings'));
     }
+    
 
     // Memproses data saat user klik 'Submit Booking'
     public function store(Request $request)
@@ -43,13 +65,13 @@ class BookingController extends Controller
 
         $slot = LaundrySlot::findOrFail($request->slot_id);
 
-        // 2. Validasi Overbooking (Pencegahan jika ada pelanggan yang klik bersamaan)
+        // 2. Validasi Overbooking
         if ($slot->current_quota >= $slot->max_quota) {
             return back()->with('error', 'Maaf, slot waktu ini baru saja penuh. Silakan pilih jadwal lain.');
         }
 
         // 3. Simpan data ke tabel bookings
-        // Catatan: Karena fitur login belum jadi, kita pakai ID user dummy (misal ID 2 = Budi)
+        // Karena kamu sudah bikin fitur login, kita ambil langsung Auth::id()
         $booking = Booking::create([
             'booking_code' => 'LQ-' . date('Ymd') . '-' . rand(100, 999),
             'user_id' => Auth::id(),
@@ -58,16 +80,32 @@ class BookingController extends Controller
             'status' => 'Menunggu Antrean',
         ]);
 
-        // 4. Tambah jumlah kuota yang terpakai di tabel laundry_slots
+        // 4. Tambah jumlah kuota yang terpakai
         $slot->increment('current_quota');
 
         // 5. Catat riwayat awal ke tracking_logs
         TrackingLog::create([
             'booking_id' => $booking->id,
             'status' => 'Menunggu Antrean',
-            'description' => 'Pesanan berhasil dibuat secara online.'
+            'description' => 'Pesanan berhasil dibuat secara online. Menunggu konfirmasi admin.'
         ]);
 
-        return back()->with('success', 'Booking berhasil! Kode Anda: ' . $booking->booking_code);
+        return back()->with('success', 'Booking berhasil! Kode Antrean Anda: ' . $booking->booking_code);
+    }
+
+    // Menghapus pesanan
+    public function destroy($id)
+    {
+        $booking = Booking::findOrFail($id);
+        
+        // Kembalikan kuota slot sebelum dihapus
+        $slot = LaundrySlot::find($booking->slot_id);
+        if($slot && $slot->current_quota > 0) {
+            $slot->decrement('current_quota');
+        }
+
+        $booking->delete();
+
+        return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan dan dihapus dari sistem!');
     }
 }

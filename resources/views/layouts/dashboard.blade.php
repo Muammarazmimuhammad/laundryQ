@@ -18,27 +18,31 @@
 
         <div class="h-20 flex items-center justify-center border-b border-slate-100">
             <a href="{{ route('home') }}" class="flex items-center gap-2 group">
-                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-md shadow-blue-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <rect x="5" y="3" width="14" height="18" rx="2" ry="2"></rect>
-                        <path d="M5 7h14"></path>
-                        <circle cx="12" cy="14" r="3"></circle>
-                    </svg>
-                </div>
-                <span class="text-xl font-black text-slate-800 tracking-tight">
-                    Laundry<span class="text-blue-600">Q</span>
-                </span>
-            </a>
+                 <a href="{{ route('home') }}" class="flex items-center group">
+                    <img src="{{ asset('img/logo.png') }}" alt="LaundryQ Logo" class="h-15 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300 drop-shadow-sm mr-23">
         </div>
+
+            {{-- ====== Sidebar Navigation ====== --}}
 
         <nav class="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-3">Menu Panel</p>
 
             @if(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-blue-50 text-blue-700 font-bold border border-blue-100">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    Dashboard Admin
-                </a>
+                <a href="{{ route('admin.dashboard') }}" 
+                    class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50 hover:text-blue-600' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('admin.dashboard') ? 'text-blue-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                        </svg>
+                        Dashboard Admin
+                    </a>
+
+                    <a href="{{ route('admin.riwayat') }}" 
+                    class="flex items-center gap-3 px-4 py-3 mt-1 rounded-xl transition-all duration-300 text-sm {{ request()->routeIs('admin.riwayat') ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50 hover:text-blue-600' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('admin.riwayat') ? 'text-blue-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Riwayat Pesanan Selesai
+                    </a>
             @else
                 <a href="{{ route('user.dashboard') }}" class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 {{ request()->routeIs('user.dashboard') ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100' : 'text-slate-500 font-medium hover:bg-slate-50 hover:text-slate-800' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
@@ -54,6 +58,8 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                     Riwayat Cucian
                 </a>
+                
+                
             @endif
             
             {{-- ====== LOGIKA PENGHITUNG OTOMATIS ====== --}}

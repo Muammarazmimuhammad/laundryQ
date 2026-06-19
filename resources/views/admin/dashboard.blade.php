@@ -91,18 +91,36 @@
 
     {{-- ===== TABLE ===== --}}
     <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-gradient-to-r from-blue-50/60 to-transparent">
-            <div>
-                <h3 class="text-lg font-black text-slate-800">Daftar Antrean Masuk</h3>
-                <p class="text-xs text-slate-400 mt-0.5">{{ $total }} pesanan tercatat dalam daftar ini</p>
+
+            {{-- ===== HEADER TABEL & FILTER ===== --}}
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-t-2xl">
+                <div>
+                    <h2 class="text-lg font-black text-slate-800 tracking-tight">Daftar Antrean Masuk</h2>
+                    <p class="text-xs font-medium text-slate-400 mt-1">Daftar pesanan berdasarkan filter yang dipilih</p>
+                </div>
+
+                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex items-center gap-2">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
+                            class="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer">
+                    </div>
+                    
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-blue-200 transition-all">
+                        Filter
+                    </button>
+
+                    @if(request('tanggal'))
+                        <a href="{{ route('admin.dashboard') }}" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-sm font-bold rounded-xl transition-all border border-rose-100" title="Hapus Filter">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </a>
+                    @endif
+                </form>
             </div>
-            @if($siap > 0)
-                <span class="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full self-start sm:self-auto">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                    {{ $siap }} siap diambil
-                </span>
-            @endif
-        </div>
+
+            {{-- ===== TABEL ===== --}}
 
         <div class="overflow-x-auto">
             <table class="min-w-full leading-normal">
@@ -117,88 +135,106 @@
                         <th class="px-6 py-4 border-b border-slate-100 bg-white text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach($bookings as $booking)
-                    <tr class="hover:bg-blue-50/30 transition-colors group">
-                        <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
-                            <span class="text-sm font-extrabold text-gray-900">{{ $booking->booking_code }}</span>
-                        </td>
-
-                        <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
-                            <span class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                {{ \Carbon\Carbon::parse($booking->created_at)->translatedFormat('d M Y, H:i') }}
-                            </span>
-                        </td>
-
-                        <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
-                            <span class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                {{ $booking->slot->time_slot ?? 'N/A' }}
-                            </span>
-                        </td>
-
-                        <td class="px-6 py-5 border-b border-slate-50 text-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-black text-xs shadow-sm shrink-0">
-                                    {{ strtoupper(substr($booking->user->name ?? 'D', 0, 1)) }}
+                <tbody class="text-sm font-medium text-slate-600 divide-y divide-slate-50">
+    
+                    @if(!isset($isFiltered) || !$isFiltered)
+                        <tr>
+                            <td colspan="7" class="py-16 text-center">
+                                <div class="flex flex-col items-center justify-center text-slate-400">
+                                    <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                                    </div>
+                                    <p class="text-lg font-black text-slate-700">Silakan Lakukan Pencarian</p>
+                                    <p class="text-sm mt-1 max-w-sm mx-auto">Pilih tanggal di pojok kanan atas atau pilih kategori layanan di sidebar kiri untuk memunculkan daftar antrean.</p>
                                 </div>
-                                <p class="text-slate-800 whitespace-no-wrap font-bold">{{ $booking->user->name ?? 'Dummy User' }}</p>
-                            </div>
-                        </td>
+                            </td>
+                        </tr>
 
-                        <td class="px-6 py-5 border-b border-slate-50 text-sm">
-                            <p class="text-slate-700 whitespace-no-wrap font-medium">{{ $booking->service->service_name ?? 'N/A' }}</p>
-                            <p class="text-blue-600 text-sm font-black mt-1">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</p>
-                        </td>
+                    @elseif($bookings->isEmpty())
+                        <tr>
+                            <td colspan="7" class="py-16 text-center">
+                                <div class="flex flex-col items-center justify-center text-slate-400">
+                                    <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-4">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <p class="text-lg font-black text-slate-700">Data Tidak Ditemukan</p>
+                                    <p class="text-sm mt-1">Tidak ada pesanan pada filter tanggal atau layanan yang dipilih.</p>
+                                </div>
+                            </td>
+                        </tr>
 
-                        <td class="px-6 py-5 border-b border-slate-50 text-sm">
-                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border {{ $statusStyles[$booking->status] ?? 'bg-slate-50 text-slate-500 border-slate-200' }}">
-                                <span class="w-1.5 h-1.5 rounded-full bg-current opacity-60"></span>
-                                {{ $booking->status }}
-                            </span>
-                        </td>
+                    @else
+                        @foreach($bookings as $booking)
+                        <tr class="hover:bg-blue-50/30 transition-colors group">
+                            <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
+                                <span class="text-sm font-extrabold text-gray-900">{{ $booking->booking_code }}</span>
+                            </td>
 
-                        <td class="px-6 py-5 border-b border-slate-50 text-sm">
-                            <div class="flex items-center gap-3 opacity-90 group-hover:opacity-100 transition-opacity">
-                                <form action="{{ route('admin.booking.update', $booking->id) }}" method="POST" class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
-                                    @csrf
-                                    <input type="number" step="0.1" name="weight" value="{{ $booking->weight }}" placeholder="Berat (Kg)" class="w-20 border border-slate-300 p-1.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-center font-medium" required>
+                            <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
+                                <span class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {{ \Carbon\Carbon::parse($booking->created_at)->translatedFormat('d M Y, H:i') }}
+                                </span>
+                            </td>
 
-                                    <select name="status" class="border border-slate-300 p-1.5 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                                        @php $statuses = ['Menunggu Antrean', 'Diterima', 'Proses Cuci', 'Pengeringan', 'Siap Diambil', 'Selesai']; @endphp
-                                        @foreach($statuses as $status)
-                                            <option value="{{ $status }}" {{ $booking->status == $status ? 'selected' : '' }}>{{ $status }}</option>
-                                        @endforeach
-                                    </select>
+                            <td class="py-5 px-6 whitespace-nowrap border-b border-slate-50">
+                                <span class="text-xs text-slate-600 font-medium flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    {{ $booking->slot->time_slot ?? 'N/A' }}
+                                </span>
+                            </td>
 
-                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm shadow-blue-200">Update</button>
-                                </form>
+                            <td class="px-6 py-5 border-b border-slate-50 text-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-black text-xs shadow-sm shrink-0">
+                                        {{ strtoupper(substr($booking->user->name ?? 'D', 0, 1)) }}
+                                    </div>
+                                    <p class="text-slate-800 whitespace-no-wrap font-bold">{{ $booking->user->name ?? 'Dummy User' }}</p>
+                                </div>
+                            </td>
 
-                                <form action="{{ route('booking.destroy', $booking->id) }}" method="POST" onsubmit="return confirm('Yakin mau menghapus pesanan ini? Data yang dihapus tidak bisa dikembalikan.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" title="Hapus Pesanan" class="bg-white text-rose-500 border border-rose-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 p-2 rounded-xl transition shadow-sm flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
+                            <td class="px-6 py-5 border-b border-slate-50 text-sm">
+                                <p class="text-slate-700 whitespace-no-wrap font-medium">{{ $booking->service->service_name ?? 'N/A' }}</p>
+                                <p class="text-blue-600 text-sm font-black mt-1">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</p>
+                            </td>
+
+                            <td class="px-6 py-5 border-b border-slate-50 text-sm">
+                                <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border {{ $statusStyles[$booking->status] ?? 'bg-slate-50 text-slate-500 border-slate-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-current opacity-60"></span>
+                                    {{ $booking->status }}
+                                </span>
+                            </td>
+
+                            <td class="px-6 py-5 border-b border-slate-50 text-sm">
+                                <div class="flex items-center gap-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                                    <form action="{{ route('admin.booking.update', $booking->id) }}" method="POST" class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                                        @csrf
+                                        <input type="number" step="0.1" name="weight" value="{{ $booking->weight }}" placeholder="Berat (Kg)" class="w-20 border border-slate-300 p-1.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-center font-medium" required>
+
+                                        <select name="status" class="border border-slate-300 p-1.5 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                            @php $statuses = ['Menunggu Antrean', 'Diterima', 'Proses Cuci', 'Pengeringan', 'Siap Diambil', 'Selesai']; @endphp
+                                            @foreach($statuses as $status)
+                                                <option value="{{ $status }}" {{ $booking->status == $status ? 'selected' : '' }}>{{ $status }}</option>
+                                            @endforeach
+                                        </select>
+
+                                        <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm shadow-blue-200">Update</button>
+                                    </form>
+
+                                    <form action="{{ route('booking.destroy', $booking->id) }}" method="POST" onsubmit="return confirm('Yakin mau menghapus pesanan ini? Data yang dihapus tidak bisa dikembalikan.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus Pesanan" class="bg-white text-rose-500 border border-rose-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 p-2 rounded-xl transition shadow-sm flex items-center justify-center">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
-
-        @if($bookings->isEmpty())
-            <div class="p-16 text-center flex flex-col items-center justify-center bg-gradient-to-b from-blue-50/40 to-white">
-                <div class="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0l-2.5 2.5M4 13l2.5 2.5M12 13v4"></path></svg>
-                </div>
-                <p class="text-slate-600 font-bold text-lg">Belum ada antrean masuk saat ini.</p>
-                <p class="text-slate-400 text-sm mt-1">Pesanan pelanggan akan otomatis muncul di sini.</p>
-            </div>
-        @endif
-    </div>
 
 @endsection

@@ -50,6 +50,9 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// Halaman Riwayat Pesanan Admin
+Route::get('/admin/riwayat', [App\Http\Controllers\AdminController::class, 'riwayat'])->name('admin.riwayat');
+
 // Dashboard Pelanggan
     Route::get('/dashboard', function() {
         $userId = Auth::id();
@@ -80,3 +83,6 @@ Route::middleware(['auth'])->group(function () {
             'latestBooking', 'latestLogs'
         ));
     })->name('user.dashboard');
+
+    // Route untuk cek ketersediaan slot di Landing Page
+Route::get('/api/cek-slot', [App\Http\Controllers\BookingController::class, 'cekSlotRealtime'])->name('api.cekslot');

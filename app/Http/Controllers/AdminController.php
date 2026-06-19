@@ -8,29 +8,39 @@ use App\Models\TrackingLog;
 
 class AdminController extends Controller
 {
-    // Menampilkan Dashboard Admin
+   // Menampilkan Dashboard Admin
     public function index(\Illuminate\Http\Request $request)
     {
-        // 1. Siapkan query dasar (ambil semua data dari yang terbaru)
-        $query = \App\Models\Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
+        // 1. Cek apakah ada aksi pencarian/filter (dari sidebar ATAU dari tanggal)
+        $isFiltered = $request->has('service') || $request->filled('tanggal');
 
-        // 2. FITUR FILTER: Cek apakah ada klik dari sidebar?
-        if ($request->has('service')) {
-            $filter = $request->service;
-            // Saring tabel berdasarkan nama layanan yang diklik
-            $query->whereHas('service', function($q) use ($filter) {
-                $q->where('service_name', 'like', '%' . $filter . '%');
-            });
+        // 2. Logika Pemanggilan Data
+        if ($isFiltered) {
+            // Jika admin melakukan filter, baru jalankan query ke database
+            $query = \App\Models\Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
+
+            if ($request->has('service')) {
+                $filter = $request->service;
+                $query->whereHas('service', function($q) use ($filter) {
+                    $q->where('service_name', 'like', '%' . $filter . '%');
+                });
+            }
+
+            if ($request->filled('tanggal')) {
+                $query->whereDate('created_at', $request->tanggal);
+            }
+
+            $bookings = $query->get();
+        } else {
+            // Jika TIDAK ADA filter sama sekali, berikan koleksi kosong (jangan load data)
+            $bookings = collect(); 
         }
 
-        // 3. Eksekusi query
-        $bookings = $query->get();
-
-        // (Opsional) Biar statistik Kotak Atas tetep ngitung semua antrean meskipun lagi difilter:
+        // 3. Statistik Kotak Atas tetep ngitung semua
         $allBookings = \App\Models\Booking::all(); 
         
-        // RETURN-NYA CUKUP SATU AJA DI PALING BAWAH SINI 👇
-        return view('admin.dashboard', compact('bookings', 'allBookings'));
+        // 4. Return ke view dengan tambahan variabel $isFiltered
+        return view('admin.dashboard', compact('bookings', 'allBookings', 'isFiltered'));
     }
 
     // Memperbarui Status, Berat, dan Harga
@@ -64,5 +74,14 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Data pesanan ' . $booking->booking_code . ' berhasil diperbarui!');
+    }
+    public function riwayat()
+    {
+        // Ambil data pesanan yang sudah 'Selesai' atau 'Archived'
+        $riwayats = \App\Models\Booking::whereIn('status', ['Selesai', 'Archived'])
+                        ->orderBy('updated_at', 'desc')
+                        ->get();
+
+        return view('admin.riwayat', compact('riwayats'));
     }
 }

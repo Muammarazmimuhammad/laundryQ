@@ -108,4 +108,42 @@ class BookingController extends Controller
 
         return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan dan dihapus dari sistem!');
     }
+
+
+    // API: Cek ketersediaan slot secara real-time di halaman depan (Welcome/Landing Page)
+    public function cekSlotRealtime(Request $request)
+    {
+        $tanggal = $request->tanggal; // Menangkap tanggal dari parameter URL (?tanggal=)
+
+        // Mengambil data menggunakan nama model asli 'LaundrySlot' dan kolom 'available_date'
+        $slots = LaundrySlot::whereDate('available_date', $tanggal)->get();
+
+        // Format datanya menjadi JSON objek terstruktur untuk dibaca JavaScript
+        $formattedSlots = $slots->map(function ($slot) {
+            
+            // Rumus hitung sisa slot: Kuota Maksimal dikurangi Kuota Terpakai Saat Ini
+            $sisa = $slot->max_quota - $slot->current_quota; 
+
+            // Logika Status & Warna Badge di UI Frontend
+            if ($sisa > 2) {
+                $status = 'Tersedia';
+                $color = 'emerald'; // Hijau
+            } elseif ($sisa > 0) {
+                $status = 'Tersedia';
+                $color = 'amber';   // Kuning/Oranye
+            } else {
+                $status = 'Penuh';
+                $color = 'rose';    // Merah
+            }
+
+            return [
+                'waktu' => $slot->time_slot,
+                'status' => $status,
+                'sisa' => $sisa,
+                'color' => $color
+            ];
+        });
+
+        return response()->json($formattedSlots);
+    }
 }

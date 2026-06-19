@@ -31,7 +31,7 @@
             <p class="text-slate-500 mt-1 text-sm">Pantau setiap tahap pencucian pakaianmu langsung dari sini.</p>
         </div>
 
-        <a href="{{ route('booking.create') }}" class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-sm shadow-blue-200 hover:bg-blue-700 transition-colors">
+        <a href="{{ route('booking.create') }}" class="inline-flex items-center justify-center gap-2  bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-3 text-sm font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-300">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             Buat Pesanan Baru
         </a>
@@ -49,38 +49,73 @@
             </div>
         @else
             @foreach($bookings as $booking)
-                @php $style = $statusStyles[$booking->status] ?? $default; @endphp
+                @php 
+                    $style = $statusStyles[$booking->status] ?? $default; 
+                    $isSelesai = $booking->status === 'Selesai';
+                @endphp
 
-                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm transition-all overflow-hidden {{ $isSelesai ? 'hover:border-blue-200 hover:shadow-md' : 'hover:shadow-md' }}">
 
                     {{-- header card --}}
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 p-6 border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-transparent">
-                        <div class="flex items-center gap-4">
-                            <div class="w-11 h-11 rounded-xl {{ $style['chip'] }} flex items-center justify-center text-white shadow-md shadow-slate-200 shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <div class="{{ $isSelesai ? 'cursor-pointer hover:bg-slate-50/80 transition-colors' : '' }} flex flex-col sm:flex-row justify-between sm:items-start gap-4 p-6 border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-transparent"
+                         @if($isSelesai) onclick="toggleRiwayat('{{ $booking->id }}')" @endif>
+                         
+                        <div class="flex items-start gap-4">
+                            <div class="w-11 h-11 mt-1 rounded-xl {{ $style['chip'] }} flex items-center justify-center text-white shadow-md shadow-slate-200 shrink-0">
+                                @if($isSelesai)
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                @else
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                @endif
                             </div>
+                            
                             <div>
                                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kode Booking</p>
                                 <h2 class="text-xl font-black text-slate-800 tracking-tight">{{ $booking->booking_code }}</h2>
+                                
                                 <div class="flex items-center gap-2 mt-1.5">
                                     <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">{{ $booking->service->service_name ?? 'Layanan Tidak Diketahui' }}</span>
                                     <span class="text-slate-300">•</span>
                                     <span class="text-xs font-black text-slate-800">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</span>
                                 </div>
+
+                                {{-- Informasi Waktu (Masuk & Selesai) --}}
+                                <div class="mt-4 space-y-1.5">
+                                    <p class="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="font-bold text-slate-600">Masuk:</span> 
+                                        {{ \Carbon\Carbon::parse($booking->created_at)->format('d M Y, H:i') }} WIB
+                                    </p>
+                                    @if($isSelesai)
+                                        <p class="text-[11px] font-medium text-emerald-600 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="font-bold text-emerald-600">Selesai:</span> 
+                                            {{ \Carbon\Carbon::parse($booking->updated_at)->format('d M Y, H:i') }} WIB
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+                        <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 mt-2 sm:mt-0">
                             <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border {{ $style['badge'] }}">
                                 <span class="w-1.5 h-1.5 rounded-full bg-current opacity-60"></span>
                                 {{ $booking->status }}
                             </span>
                             <p class="text-xs font-bold text-slate-500 bg-slate-50 border border-slate-100 px-3 py-1 rounded-lg">Berat: <span class="text-slate-800">{{ $booking->weight }} Kg</span></p>
+
+                            {{-- Indikator Buka/Tutup Jika Selesai --}}
+                            @if($isSelesai)
+                                <div class="mt-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-blue-500">
+                                    <span id="text-toggle-{{ $booking->id }}">Lihat Detail</span>
+                                    <svg id="icon-toggle-{{ $booking->id }}" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
-                    {{-- timeline --}}
-                    <div class="p-6">
+                    {{-- timeline (Dibungkus ID & Class Hidden jika Selesai) --}}
+                    <div id="detail-{{ $booking->id }}" class="{{ $isSelesai ? 'hidden' : 'block' }} p-6 bg-slate-50/30">
                         @if($booking->trackingLogs->isEmpty())
                             <div class="text-sm text-slate-400 italic bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 Cucianmu belum diserahkan ke outlet / belum ada riwayat pemrosesan.
@@ -129,5 +164,24 @@
         @endif
     </div>
 </div>
+
+{{-- SCRIPT UNTUK BUKA-TUTUP DETAIL PESANAN --}}
+<script>
+    function toggleRiwayat(id) {
+        const detailDiv = document.getElementById('detail-' + id);
+        const iconToggle = document.getElementById('icon-toggle-' + id);
+        const textToggle = document.getElementById('text-toggle-' + id);
+
+        if (detailDiv.classList.contains('hidden')) {
+            detailDiv.classList.remove('hidden');
+            iconToggle.classList.add('rotate-180');
+            textToggle.innerText = 'TUTUP DETAIL';
+        } else {
+            detailDiv.classList.add('hidden');
+            iconToggle.classList.remove('rotate-180');
+            textToggle.innerText = 'LIHAT DETAIL';
+        }
+    }
+</script>
 
 @endsection

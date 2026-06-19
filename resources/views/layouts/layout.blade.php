@@ -27,17 +27,11 @@
         </button>
 
         <div class="w-full md:w-1/2 relative h-48 md:h-auto hidden sm:block">
-            <img src="https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="LaundryQ Service" class="w-full h-full object-cover">
+            <img src="{{ asset('img/welcome.jpg') }}" alt="LaundryQ Service" class="w-full h-full object-cover">
             
             <div class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/20 to-transparent flex flex-col justify-end p-8">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect x="5" y="3" width="14" height="18" rx="2" ry="2"></rect>
-                            <path d="M5 7h14"></path>
-                            <circle cx="12" cy="14" r="4"></circle>
-                        </svg>
-                    </div>
+                    
                     <span class="text-2xl font-black text-white tracking-tight drop-shadow-md">
                         Laundry<span class="text-cyan-300">Q</span>
                     </span>

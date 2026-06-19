@@ -1,6 +1,6 @@
 <nav class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
     <div class="w-full px-4 sm:px-8 lg:px-12">
-        <div class="flex justify-between items-center h-20">
+        <div class="flex justify-between items-center h-20 relative">
             
             <div class="flex items-center gap-10">
                 <a href="{{ route('home') }}" class="flex items-center group">
@@ -9,7 +9,9 @@
                 
                 <div class="hidden md:flex items-center gap-1">
                     <a href="{{ route('home') }}" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Beranda</a>
-                    <a href="{{ route('home') }}#keunggulan" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Tentang Kami</a>
+                    <a href="{{ route('home') }}#cara-kerja" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Cara Kerja</a>
+                    <a href="{{ route('home') }}#cek-slot" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Cek Slot</a>
+                    <a href="{{ route('home') }}#keunggulan" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Keunggulan</a>
                     <a href="{{ route('home') }}#layanan" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Layanan</a>
                     <a href="{{ route('home') }}#testimoni" class="px-4 py-2 rounded-full text-gray-600 font-medium hover:text-blue-600 hover:bg-blue-50 transition-all duration-300">Testimoni</a>
                 </div>
@@ -66,13 +68,69 @@
             </div>
 
             <div class="md:hidden flex items-center">
-                <button class="text-gray-600 hover:text-blue-600 focus:outline-none p-2 transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-600 focus:outline-none p-2 transition-colors">
+                    <svg id="icon-menu" class="w-7 h-7 block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <svg id="icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
 
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden absolute top-20 left-0 w-full bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-xl overflow-y-auto max-h-[80vh]">
+        <div class="px-4 pt-4 pb-6 space-y-2">
+            <a href="{{ route('home') }}" class="block px-4 py-3 rounded-xl text-base font-bold text-blue-600 bg-blue-50">Beranda</a>
+            <a href="{{ route('home') }}#cara-kerja" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50">Cara Kerja</a>
+            <a href="{{ route('home') }}#cek-slot" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50">Cek Slot</a>
+            <a href="{{ route('home') }}#keunggulan" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50">Keunggulan</a>
+            <a href="{{ route('home') }}#layanan" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50">Layanan</a>
+            <a href="{{ route('home') }}#testimoni" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50">Testimoni</a>
+            
+            <div class="border-t border-gray-100 mt-4 pt-4">
+                @auth
+                    <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl mb-3 border border-gray-100">
+                        <div class="bg-blue-100 rounded-full p-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Masuk Sebagai</p>
+                            <p class="font-black text-gray-800">{{ Auth::user()->name }}</p>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('booking.create') }}" class="block px-4 py-3 rounded-xl text-base font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Pesan Antrean Baru
+                    </a>
+                    
+                    <a href="{{ route('tracking.index') }}" class="block px-4 py-3 rounded-xl text-base font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        Lacak Pesanan Saya
+                    </a>
+
+                    @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 rounded-xl text-base font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 flex items-center gap-2 mt-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Masuk Area Admin
+                        </a>
+                    @endif
+
+                    <form action="{{ route('logout') }}" method="POST" class="mt-4">
+                        @csrf
+                        <button type="submit" class="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold px-4 py-3 rounded-xl text-center transition-colors">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="block w-full text-center px-4 py-3 rounded-xl text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md">
+                        Login / Daftar
+                    </a>
+                @endauth
+            </div>
         </div>
     </div>
 </nav>
@@ -82,3 +140,44 @@
         100% { transform: translateX(100%); }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const iconMenu = document.getElementById('icon-menu');
+        const iconClose = document.getElementById('icon-close');
+
+        // Fungsi klik tombol hamburger
+        if(btn && menu) {
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+                
+                // Tukar Icon Garis 3 dan Silang (Close)
+                if(menu.classList.contains('hidden')) {
+                    iconMenu.classList.remove('hidden');
+                    iconMenu.classList.add('block');
+                    iconClose.classList.add('hidden');
+                    iconClose.classList.remove('block');
+                } else {
+                    iconMenu.classList.add('hidden');
+                    iconMenu.classList.remove('block');
+                    iconClose.classList.remove('hidden');
+                    iconClose.classList.add('block');
+                }
+            });
+        }
+
+        // Fitur Tambahan: Tutup menu otomatis kalau user nge-klik salah satu link
+        const mobileLinks = menu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+                iconMenu.classList.remove('hidden');
+                iconMenu.classList.add('block');
+                iconClose.classList.add('hidden');
+                iconClose.classList.remove('block');
+            });
+        });
+    });
+</script>

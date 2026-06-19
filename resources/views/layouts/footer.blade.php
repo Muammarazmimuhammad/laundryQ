@@ -11,13 +11,7 @@
             
             <div class="space-y-6">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 group inline-block">
-                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-blue-600/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect x="5" y="3" width="14" height="18" rx="2" ry="2"></rect>
-                            <path d="M5 7h14"></path>
-                            <circle cx="12" cy="14" r="4"></circle>
-                        </svg>
-                    </div>
+                    
                     <span class="text-2xl font-black text-white tracking-tight">
                         Laundry<span class="text-cyan-400">Q</span>
                     </span>

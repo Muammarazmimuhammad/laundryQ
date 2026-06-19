@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - LaundryQ</title>
+        <link class="w-50 h-50 ml-2" rel="icon" type="image/png" href="{{ asset('img/logo-web.png') }}">
+
     @vite(['resources/css/app.css'])
 </head>
-<body class="relative min-h-screen flex items-center justify-center font-sans overflow-hidden">
+<body class="relative min-h-screen flex items-center justify-center font-sans overflow-hidden bg-slate-50 lg:bg-transparent overflow-y-auto lg:overflow-hidden">
 
-    <div class="absolute inset-0 z-0">
+    <div class="absolute inset-0 z-0 hidden lg:block">
         <img src="{{ asset('img/background-laundry.jpg') }}" alt="Background Laundry" class="w-full h-full object-cover">
-        
         <div class="absolute inset-0 bg-gradient-to-r from-[#0061ff]/100 via-[#00c6ff]/70 to-[#f0f9ff]/95"></div>
     </div>
 
-    <a href="{{ route('home') }}" class="absolute top-6 left-6 lg:top-10 lg:left-10 z-20 flex items-center gap-2 text-white/90 hover:text-white font-semibold text-sm transition-colors bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full backdrop-blur-md border border-white/20">
+    <a href="{{ route('home') }}" class="absolute top-6 left-6 lg:top-10 lg:left-10 z-20 flex items-center gap-2 text-slate-700 lg:text-white/90 hover:text-blue-600 lg:hover:text-white font-semibold text-sm transition-colors bg-white/70 lg:bg-white/10 hover:bg-white lg:hover:bg-white/20 px-4 py-2 rounded-full backdrop-blur-md border border-slate-200 lg:border-white/20 shadow-sm lg:shadow-none">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Kembali
     </a>
 
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-12 pt-20 lg:pt-0">
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-12 pt-28 pb-10 lg:pt-0 lg:pb-0">
         
-        <div class="w-full lg:w-1/2 text-white">
+        <div class="hidden lg:block w-full lg:w-1/2 text-white">
             <h1 class="text-4xl lg:text-6xl font-black leading-[1.1] mb-6 tracking-tight drop-shadow-lg">
                 Sistem Cerdas,<br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-cyan-100">Revolusi Cara Mencuci.</span>
@@ -32,18 +33,18 @@
 
             <div class="flex flex-wrap gap-4">
                 <div class="flex items-center gap-3 text-sm font-bold bg-white/20 px-4 py-2.5 rounded-xl border border-white/20 backdrop-blur-md shadow-lg">
-                    <svg class="w-5 h-5 text-white-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Bebas Antrean Fisik
                 </div>
                 <div class="flex items-center gap-3 text-sm font-bold bg-white/20 px-4 py-2.5 rounded-xl border border-white/20 backdrop-blur-md shadow-lg">
-                    <svg class="w-5 h-5 text-white-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     Pantauan Real-Time
                 </div>
             </div>
         </div>
 
-        <div class="w-full lg:w-5/12 max-w-md flex justify-end">
-            <div class="w-full bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-100 p-8 sm:p-10">
+        <div class="w-full lg:w-5/12 max-w-md mx-auto lg:mx-0 flex justify-center lg:justify-end">
+            <div class="w-full bg-white lg:bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl lg:shadow-2xl border border-slate-200 lg:border-slate-100 p-8 sm:p-10">
                 
                 <div class="mb-8">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo LaundryQ" class="h-14 object-contain mb-6">

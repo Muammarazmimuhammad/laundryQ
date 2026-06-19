@@ -18,9 +18,9 @@
         </div>
 
       <a href="{{ route('booking.create') }}" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-300">
-    Pesan Antrean Baru
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-</a>
+          Pesan Antrean Baru
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
     </div>
 
     {{-- ===== STAT CARDS ===== --}}
@@ -92,7 +92,7 @@
 
     </div>
 
-{{-- ===== AREA TRACKING (Split 2 Kolom ala Referensi) ===== --}}
+    {{-- ===== AREA TRACKING (Split 2 Kolom ala Referensi) ===== --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- KOLOM KIRI (Lebar): Status Pesanan Terkini --}}
@@ -133,7 +133,7 @@
                             if($latestBooking->status == 'Pengeringan') $progress = 80;
                             if($latestBooking->status == 'Siap Diambil' || $latestBooking->status == 'Selesai') $progress = 100;
                         @endphp
-                        <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000" @style(['width: ' . $progress . '%'])></div>
+                        <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000" style="width: {{ $progress }}%;"></div>
                     </div>
 
                     {{-- STATUS SAAT INI & TOMBOL LIHAT STRUK --}}
@@ -157,91 +157,95 @@
                                 Lihat Struk
                             </button>
 
-                            <!-- POP-UP STRUK (MODAL) TERSEMBUNYI -->
-                        <div id="modal-struk-{{ $latestBooking->id }}" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-                            <div class="absolute inset-0" onclick="closeStruk('{{ $latestBooking->id }}')"></div>
+                            {{-- PUSH STRUK KE LUAR LAYOUT --}}
+                            @push('modals')
+                                <div id="modal-struk-{{ $latestBooking->id }}" class="fixed inset-0 z-[9999] hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300 p-4">
+                                    <div class="absolute inset-0" onclick="closeStruk('{{ $latestBooking->id }}')"></div>
 
-                            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform scale-95 transition-transform duration-300 relative z-10" id="modal-content-{{ $latestBooking->id }}">
-                                
-                                <div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center relative">
-                                    <div class="bg-white/95 px-4 py-2.5 rounded-2xl inline-block mx-auto mb-4 shadow-lg">
-                                        <img src="{{ asset('img/logo.png') }}" alt="LaundryQ Logo" class="h-7 w-auto object-contain">
-                                    </div>
-                                    
-                                    <h3 class="text-white font-black text-xl tracking-wide">E-Receipt</h3>
-                                    <p class="text-blue-100 text-xs font-medium mt-1">Nota Digital Resmi LaundryQ</p>
-                                    
-                                    <button type="button" onclick="closeStruk('{{ $latestBooking->id }}')" class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                    </button>
-                                </div>
-
-                                <!-- Body Struk -->
-                                <div class="p-6 bg-slate-50">
-                                    <div class="space-y-4">
+                                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden transform scale-90 transition-transform duration-300 relative z-10" id="modal-content-{{ $latestBooking->id }}">
                                         
-                                        <!-- NAMA PELANGGAN -->
-                                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium">Nama Pelanggan</span>
-                                            <span class="text-sm font-black text-slate-800 uppercase">{{ $latestBooking->user->name ?? Auth::user()->name }}</span>
+                                        <div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-center relative">
+                                            <div class="bg-white/95 px-4 py-2.5 rounded-2xl inline-block mx-auto mb-4 shadow-lg">
+                                                <img src="{{ asset('img/logo.png') }}" alt="LaundryQ Logo" class="h-7 w-auto object-contain">
+                                            </div>
+                                            
+                                            <h3 class="text-white font-black text-xl tracking-wide">E-Receipt</h3>
+                                            <p class="text-blue-100 text-xs font-medium mt-1">Nota Digital Resmi LaundryQ</p>
+                                            
+                                            <button type="button" onclick="closeStruk('{{ $latestBooking->id }}')" class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-1">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
                                         </div>
 
-                                        <!-- No Pesanan -->
-                                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium">No. Pesanan</span>
-                                            <span class="text-sm font-bold text-slate-800">#{{ $latestBooking->booking_code }}</span>
-                                        </div>
-                                        
-                                        <!-- Layanan -->
-                                        <div class="flex justify-between items-start border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium pt-0.5">Layanan</span>
-                                            <span class="text-sm font-bold text-blue-600 text-right max-w-[60%]">
-                                                {{ $latestBooking->service->service_name ?? 'Layanan Laundry' }}
-                                            </span>
-                                        </div>
-                                        
-                                        <!-- Berat / Satuan -->
-                                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium">Berat/Satuan</span>
-                                            <span class="text-sm font-bold text-slate-800">{{ $latestBooking->weight ?? '0' }} Kg</span>
-                                        </div>
+                                        <div class="p-5 bg-slate-50 relative">
+                                            
+                                            <div class="absolute -top-2.5 left-0 w-full h-[10px] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIxMCI+PHBhdGggZD0iTTAgMTBhNSA1IDAgMCAwIDEwIDBhNSA1IDAgMCAwIDEwIDBWMEgwdjEweiIgZmlsbD0iI2Y4ZmFmYyIvPjwvc3ZnPg==')] repeat-x z-20"></div>
 
-                                        <!-- TANGGAL & WAKTU MASUK -->
-                                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium">Waktu Masuk</span>
-                                            <span class="text-xs font-bold text-slate-700">
-                                                {{ \Carbon\Carbon::parse($latestBooking->created_at)->format('d M Y, H:i') }} WIB
-                                            </span>
-                                        </div>
+                                            <div class="relative flex items-center justify-center pt-2 mb-4">
+                                                <div class="absolute w-full border-t-2 border-dashed border-slate-200"></div>
+                                                <div class="bg-slate-50 px-3 text-slate-300 relative z-10 flex items-center gap-1.5 opacity-80">
+                                                    <svg class="w-4 h-4 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path></svg>
+                                                    <span class="text-[9px] text-gray-400 font-black tracking-widest uppercase">E-Receipt</span>
+                                                </div>
+                                            </div>
 
-                                        <!-- TANGGAL & WAKTU SELESAI -->
-                                        <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
-                                            <span class="text-xs text-slate-500 font-medium">Waktu Selesai</span>
-                                            <span class="text-xs font-bold text-slate-700">
-                                                {{ $latestBooking->updated_at ? \Carbon\Carbon::parse($latestBooking->updated_at)->format('d M Y, H:i') . ' WIB' : '-' }}
-                                            </span>
-                                        </div>
-                                        
-                                        <!-- Total Bayar -->
-                                        <div class="pt-2">
-                                            <div class="flex justify-between items-center bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                                                <span class="text-sm font-black text-slate-700">Total Bayar</span>
-                                                <span class="text-xl font-black text-emerald-600">Rp{{ number_format($latestBooking->total_price ?? 0, 0, ',', '.') }}</span>
+                                            <div class="space-y-4 pt-2">
+                                                <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium">Nama Pelanggan</span>
+                                                    <span class="text-sm font-black text-slate-800 uppercase text-right">{{ $latestBooking->user->name ?? Auth::user()->name }}</span>
+                                                </div>
+
+                                                <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium">No. Pesanan</span>
+                                                    <span class="text-sm font-bold text-slate-800">#{{ $latestBooking->booking_code }}</span>
+                                                </div>
+                                                
+                                                <div class="flex justify-between items-start border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium pt-0.5">Layanan</span>
+                                                    <span class="text-sm font-bold text-blue-600 text-right max-w-[60%]">
+                                                        {{ $latestBooking->service->service_name ?? 'Layanan Laundry' }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium">Berat/Satuan</span>
+                                                    <span class="text-sm font-bold text-slate-800">{{ $latestBooking->weight ?? '0' }} Kg</span>
+                                                </div>
+
+                                                <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium">Waktu Masuk</span>
+                                                    <span class="text-xs font-bold text-slate-700 text-right">
+                                                        {{ \Carbon\Carbon::parse($latestBooking->created_at)->format('d M Y, H:i') }} WIB
+                                                    </span>
+                                                </div>
+
+                                                <div class="flex justify-between items-center border-b border-dashed border-slate-300 pb-3">
+                                                    <span class="text-xs text-slate-500 font-medium">Waktu Selesai</span>
+                                                    <span class="text-xs font-bold text-slate-700 text-right">
+                                                        {{ $latestBooking->updated_at ? \Carbon\Carbon::parse($latestBooking->updated_at)->format('d M Y, H:i') . ' WIB' : '-' }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="pt-2">
+                                                    <div class="flex justify-between items-center bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-inner">
+                                                        <span class="text-sm font-black text-slate-700">Total Bayar</span>
+                                                        <span class="text-xl font-black text-emerald-600">Rp{{ number_format($latestBooking->total_price ?? 0, 0, ',', '.') }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-6 text-center">
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Terima kasih telah menggunakan LaundryQ!</p>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="mt-6 text-center">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Terima kasih telah menggunakan LaundryQ!</p>
+                                        
+                                        <div class="p-4 bg-white border-t border-slate-100">
+                                            <button onclick="closeStruk('{{ $latestBooking->id }}')" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-colors">Tutup Struk</button>
+                                        </div>
+                                        
                                     </div>
                                 </div>
-                                
-                                <div class="p-4 bg-white border-t border-slate-100">
-                                    <button onclick="closeStruk('{{ $latestBooking->id }}')" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-colors">Tutup Struk</button>
-                                </div>
-                                
-                            </div>
-                        </div>
+                            @endpush
                         @endif
 
                     </div>
@@ -257,7 +261,7 @@
         </div>
 
         {{-- KOLOM KANAN (Sempit): Log Aktivitas Terakhir --}}
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mt-6 lg:mt-0">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">Aktivitas Terakhir</h2>
@@ -275,7 +279,7 @@
                                 if(str_contains(strtolower($log->status), 'proses')) $color = 'bg-blue-100 text-blue-600';
                                 if(str_contains(strtolower($log->status), 'menunggu')) $color = 'bg-orange-100 text-orange-600';
                             @endphp
-                            <div class="w-8 h-8 rounded-full {{ $color }} flex items-center justify-center text-xs font-black">
+                            <div class="w-8 h-8 rounded-full {{ $color }} flex items-center justify-center text-xs font-black shadow-sm">
                                 {{ substr($log->status, 0, 1) }}
                             </div>
                         </div>
@@ -323,5 +327,4 @@
         }
     </script>
     
-
 @endsection

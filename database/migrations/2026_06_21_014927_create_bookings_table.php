@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // --- TAMBAHKAN BARIS INI BOS ---
+            $table->unsignedBigInteger('service_id')->nullable(); 
+            // -------------------------------
+            
             $table->string('status')->default('pending');
             $table->date('booking_date')->nullable();
-            
-            // --- INI LACI UANGNYA  ---
             $table->integer('total_price')->default(0); 
-            // ----------------------------
-            
             $table->timestamps();
         });
     }

@@ -16,7 +16,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('status')->default('pending');
             $table->date('booking_date')->nullable();
-            // Tambahkan kolom lain di sini kalau ada (misal: total_harga, dll)
+            
+            // --- INI LACI UANGNYA  ---
+            $table->integer('total_price')->default(0); 
+            // ----------------------------
+            
             $table->timestamps();
         });
     }

@@ -19,7 +19,9 @@ class Booking extends Model
         'weight', 
         'total_price', 
         'status', 
-        'notes'
+        'notes',
+        'weight',        
+        'total_price',   
     ];
 
     // Relasi ke tabel User

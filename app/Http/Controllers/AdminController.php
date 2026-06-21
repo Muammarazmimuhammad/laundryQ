@@ -55,7 +55,7 @@ class AdminController extends Controller
         $oldStatus = $booking->status;
         
         // Hitung total harga otomatis jika berat diinput
-        $totalPrice = $request->weight * $booking->service->price_per_kg;
+        $totalPrice = $request->weight * $booking->service->price;
 
         // Update data booking
         $booking->update([

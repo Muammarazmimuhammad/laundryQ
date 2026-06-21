@@ -8,8 +8,8 @@ use App\Models\TrackingLog;
 
 class AdminController extends Controller
 {
-   // Menampilkan Dashboard Admin
-    public function index(\Illuminate\Http\Request $request)
+    // Menampilkan Dashboard Admin
+    public function index(Request $request)
     {
         // 1. Cek apakah ada aksi pencarian/filter (dari sidebar ATAU dari tanggal)
         $isFiltered = $request->has('service') || $request->filled('tanggal');
@@ -17,7 +17,7 @@ class AdminController extends Controller
         // 2. Logika Pemanggilan Data
         if ($isFiltered) {
             // Jika admin melakukan filter, baru jalankan query ke database
-            $query = \App\Models\Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
+            $query = Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
 
             if ($request->has('service')) {
                 $filter = $request->service;
@@ -32,12 +32,13 @@ class AdminController extends Controller
 
             $bookings = $query->get();
         } else {
-            // Jika TIDAK ADA filter sama sekali, berikan koleksi kosong (jangan load data)
-            $bookings = collect(); 
+            // JALUR AMAN: Jika pertama dibuka tanpa filter, tampilkan semua data biar dashboard admin gak kosong melompong
+            $bookings = Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc')->get(); 
+            $isFiltered = true;
         }
 
         // 3. Statistik Kotak Atas tetep ngitung semua
-        $allBookings = \App\Models\Booking::all(); 
+        $allBookings = Booking::all(); 
         
         // 4. Return ke view dengan tambahan variabel $isFiltered
         return view('admin.dashboard', compact('bookings', 'allBookings', 'isFiltered'));
@@ -47,15 +48,15 @@ class AdminController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'weight' => 'numeric|min:0',
+            'weight' => 'required|numeric|min:0',
             'status' => 'required|in:Menunggu Antrean,Diterima,Proses Cuci,Pengeringan,Siap Diambil,Selesai'
         ]);
 
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('service')->findOrFail($id);
         $oldStatus = $booking->status;
         
-        // Hitung total harga otomatis jika berat diinput
-        $totalPrice = $request->weight * $booking->service->price;
+        // Hitung total harga otomatis berdasarkan harga paket layanan yang aktif
+        $totalPrice = $request->weight * ($booking->service->price ?? 0);
 
         // Update data booking
         $booking->update([
@@ -75,10 +76,11 @@ class AdminController extends Controller
 
         return back()->with('success', 'Data pesanan ' . $booking->booking_code . ' berhasil diperbarui!');
     }
+
     public function riwayat()
     {
-        // Ambil data pesanan yang sudah 'Selesai' atau 'Archived'
-        $riwayats = \App\Models\Booking::whereIn('status', ['Selesai', 'Archived'])
+        // Ambil data pesanan yang sudah 'Selesai' atau 'Archived' ditambah eager loading biar makin ngebut
+        $riwayats = Booking::with(['user', 'service', 'slot'])->whereIn('status', ['Selesai', 'Archived'])
                         ->orderBy('updated_at', 'desc')
                         ->get();
 

@@ -286,7 +286,7 @@
                         <div>
                             <p class="text-sm font-bold text-slate-800">{{ $log->status }}</p>
                             <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">{{ $log->description }}</p>
-                            <p class="text-xs font-semibold text-slate-400 mt-1">{{ \Carbon\Carbon::parse($log->changed_at)->diffForHumans() }}</p>
+                            <p class="text-xs font-semibold text-slate-400 mt-1">{{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}</p>
                         </div>
                     </div>
                 @empty

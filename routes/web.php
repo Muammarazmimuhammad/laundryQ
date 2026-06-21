@@ -73,7 +73,7 @@ Route::get('/admin/riwayat', [App\Http\Controllers\AdminController::class, 'riwa
         $latestLogs = collect();
         if ($latestBooking) {
             $latestLogs = \App\Models\TrackingLog::where('booking_id', $latestBooking->id)
-                                                ->orderBy('changed_at', 'desc')
+                                                ->orderBy('created_at', 'desc')
                                                 ->take(5) // Ambil 5 aktivitas terakhir
                                                 ->get();
         }

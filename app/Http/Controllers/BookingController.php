@@ -43,8 +43,8 @@ class BookingController extends Controller
                     ->orderBy('time_slot', 'asc')
                     ->get();
 
-        $bookings = Booking::with(['service', 'slot', 'trackingLogs' => function($query) {
-            $query->orderBy('changed_at', 'desc'); 
+            $bookings = Booking::with(['service', 'slot', 'trackingLogs' => function($query) {
+            $query->orderBy('created_at', 'desc'); // <-- UBAH DI SINI BOS
         }])
         ->where('user_id', Auth::id())
         ->orderBy('created_at', 'desc')

@@ -63,8 +63,8 @@
                         <select name="service_id" class="w-full appearance-none border-2 border-blue-100 bg-blue-50/30 text-blue-900 font-bold py-4 pl-14 pr-10 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 hover:border-blue-300 transition-all cursor-pointer outline-none shadow-sm" required>
                             <option value="" class="text-gray-400 font-medium">-- Pilih Jenis Paket --</option>
                             @foreach($services as $service)
-                               <option value="{{ $paket->id }}">
-                                    {{ $paket->service_name }} (Rp{{ $paket->price }}/kg)
+                                <option value="{{ $service->id }}">
+                                    {{ $service->service_name }} (Rp{{ number_format($service->price, 0, ',', '.') }}/kg)
                                 </option>
                             @endforeach
                         </select>

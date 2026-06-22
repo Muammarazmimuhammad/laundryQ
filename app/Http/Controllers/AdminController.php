@@ -74,6 +74,36 @@ class AdminController extends Controller
             ]);
         }
 
+        // Jika status berubah menjadi "Siap Diambil", tembak notif WA!
+        if ($request->status == 'Siap Diambil' && $oldStatus !== 'Siap Diambil') {
+            
+            // 1. Rangkai isi pesannya (Bebas mau dimodif kayak gimana)
+            $pesan = "Halo Kak *" . $booking->user->name . "* 🌊\n\n";
+            $pesan .= "Cucianmu dengan resi *" . $booking->booking_code . "* sudah selesai, wangi, dan siap diambil ya!\n";
+            $pesan .= "Total biaya: *Rp" . number_format($booking->total_price, 0, ',', '.') . "*.\n\n";
+            $pesan .= "Terima kasih telah menggunakan layanan LaundryQ Kelompok Kurma! 👕✨";
+
+            // 2. Siapkan penembak (cURL)
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+              CURLOPT_URL => 'https://api.fonnte.com/send',
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_CUSTOMREQUEST => 'POST',
+              CURLOPT_POSTFIELDS => array(
+                'target' => '089668696731', // GANTI PAKE NOMOR WA KAMU SENDIRI BIAR MASUK KE HP-MU
+                'message' => $pesan,
+                'countryCode' => '62',
+              ),
+              CURLOPT_HTTPHEADER => array(
+                'Authorization: wgreea6LtgF4kpX2j77h' // PASTE TOKEN DARI FONNTE DI SINI
+              ),
+            ));
+            
+            // Tarik pelatuknya!
+            $response = curl_exec($curl);
+            curl_close($curl);
+        }
+
         return back()->with('success', 'Data pesanan ' . $booking->booking_code . ' berhasil diperbarui!');
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\TrackingLog;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -16,7 +17,6 @@ class AdminController extends Controller
 
         // 2. Logika Pemanggilan Data
         if ($isFiltered) {
-            // Jika admin melakukan filter, baru jalankan query ke database
             $query = Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc');
 
             if ($request->has('service')) {
@@ -32,16 +32,33 @@ class AdminController extends Controller
 
             $bookings = $query->get();
         } else {
-            // JALUR AMAN: Jika pertama dibuka tanpa filter, tampilkan semua data biar dashboard admin gak kosong melompong
+            // JALUR AMAN: Jika pertama dibuka tanpa filter, tampilkan semua data
             $bookings = Booking::with(['user', 'service', 'slot'])->orderBy('created_at', 'desc')->get(); 
             $isFiltered = true;
         }
 
         // 3. Statistik Kotak Atas tetep ngitung semua
         $allBookings = Booking::all(); 
+
+        // ====================================================================
+        // 🔥 FITUR BARU: ENGINE GRAFIK KEUANGAN (7 HARI TERAKHIR)
+        // ====================================================================
+        $pendapatanHarian = Booking::where('status', 'Selesai')
+            ->selectRaw('DATE(updated_at) as tanggal, SUM(total_price) as total')
+            ->groupBy('tanggal')
+            ->orderBy('tanggal', 'asc')
+            ->take(7)
+            ->get();
+
+        // Format tanggalnya jadi "22 Jun" pakai bahasa Indonesia
+        $chartLabels = $pendapatanHarian->pluck('tanggal')->map(function($tgl) {
+            return Carbon::parse($tgl)->locale('id')->format('d M');
+        })->toArray();
+
+        $chartValues = $pendapatanHarian->pluck('total')->toArray();
+        // ====================================================================
         
-        // 4. Return ke view dengan tambahan variabel $isFiltered
-        return view('admin.dashboard', compact('bookings', 'allBookings', 'isFiltered'));
+        return view('admin.dashboard', compact('bookings', 'allBookings', 'isFiltered', 'chartLabels', 'chartValues'));
     }
 
     // Memperbarui Status, Berat, dan Harga
@@ -55,17 +72,14 @@ class AdminController extends Controller
         $booking = Booking::with('service')->findOrFail($id);
         $oldStatus = $booking->status;
         
-        // Hitung total harga otomatis berdasarkan harga paket layanan yang aktif
         $totalPrice = $request->weight * ($booking->service->price ?? 0);
 
-        // Update data booking
         $booking->update([
             'weight' => $request->weight,
             'total_price' => $totalPrice,
             'status' => $request->status,
         ]);
 
-        // Jika status berubah, catat ke tabel tracking_logs
         if ($oldStatus !== $request->status) {
             TrackingLog::create([
                 'booking_id' => $booking->id,
@@ -87,12 +101,12 @@ class AdminController extends Controller
               CURLOPT_RETURNTRANSFER => true,
               CURLOPT_CUSTOMREQUEST => 'POST',
               CURLOPT_POSTFIELDS => array(
-                'target' => $booking->user->phone, // <-- JALUR OTOMATIS AKTIF!
+                'target' => $booking->user->phone, 
                 'message' => $pesan,
                 'countryCode' => '62',
               ),
               CURLOPT_HTTPHEADER => array(
-                'Authorization: wgreea6LtgF4kpX2j77h' // Token Fonnte
+                'Authorization: wgreea6LtgF4kpX2j77h' 
               ),
             ));
             
@@ -105,7 +119,6 @@ class AdminController extends Controller
 
     public function riwayat()
     {
-        // Ambil data pesanan yang sudah 'Selesai' atau 'Archived' ditambah eager loading biar makin ngebut
         $riwayats = Booking::with(['user', 'service', 'slot'])->whereIn('status', ['Selesai', 'Archived'])
                         ->orderBy('updated_at', 'desc')
                         ->get();

@@ -54,7 +54,7 @@ class AdminController extends Controller
         $periodeLabel = $startOfWeek->translatedFormat('d M Y') . ' — ' . $endOfWeek->translatedFormat('d M Y');
 
         // 3. Buat kerangka 7 hari mutlak dari Senin s/d Minggu
-        $weeklyCashflow = collect();
+        $weeklyCashflow = []; // <-- KUNCI JAWABANNYA: Pakai array PHP biasa, jangan collect()
         $currentDay = $startOfWeek->copy();
 
         for ($i = 0; $i < 7; $i++) {
@@ -79,12 +79,13 @@ class AdminController extends Controller
         // 5. Timpa laci Rp0 dengan pendapatan asli jika harinya ada transaksi
         foreach ($pendapatanDB as $tgl => $total) {
             if (isset($weeklyCashflow[$tgl])) {
-                $weeklyCashflow[$tgl]['total'] = $total;
+                $weeklyCashflow[$tgl]['total'] = $total; // <-- Sekarang PHP nggak akan rewel lagi!
             }
         }
 
-        $chartLabels = $weeklyCashflow->pluck('label')->toArray();
-        $chartValues = $weeklyCashflow->pluck('total')->toArray();
+        // Bungkus kembali menjadi collect() saat mau diekstrak datanya
+        $chartLabels = collect($weeklyCashflow)->pluck('label')->toArray();
+        $chartValues = collect($weeklyCashflow)->pluck('total')->toArray();
 
         // ====================================================================
         // 📦 PENANDA KIRI BAWAH (TETAP MENGHITUNG MINGGU INI & BULAN INI SECARA LIVE)

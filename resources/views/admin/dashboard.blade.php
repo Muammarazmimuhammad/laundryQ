@@ -89,25 +89,64 @@
 
     </div>
 
-    {{-- ===== KANVAS GRAFIK FINANCIAL ANALYTICS (MODERN UI) ===== --}}
+    {{-- ===== KANVAS GRAFIK FINANCIAL ANALYTICS (MODERN UI DENGAN MESIN WAKTU) ===== --}}
     <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-8">
         
-        {{-- 1. HEADER GRAFIK --}}
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        {{-- 1. HEADER GRAFIK & PAGINASI --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-inner">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 </div>
                 <div>
                     <h2 class="text-lg font-black text-slate-800 tracking-tight">Tren Pendapatan Arus Kas</h2>
-                    <p class="text-xs font-medium text-slate-400 mt-0.5">Proyeksi pertumbuhan omzet harian menuju Break Even Point (BEP)</p>
+                    <p class="text-xs font-bold text-blue-600 mt-0.5">Periode: {{ $periodeLabel ?? 'Memuat...' }}</p>
                 </div>
             </div>
 
-            <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-[11px] font-black px-3 py-1 rounded-full border border-emerald-100 shrink-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                Chart.js Engine
-            </span>
+            {{-- TOMBOL MESIN WAKTU --}}
+            <div class="flex items-center gap-1 bg-slate-50 p-1.5 rounded-xl border border-slate-200/60 text-xs font-extrabold self-start lg:self-auto">
+                
+                {{-- Tombol Mundur (Pekan Sebelumnya) --}}
+                <a href="{{ request()->fullUrlWithQuery(['pekan' => ($weekOffset ?? 0) - 1]) }}" 
+                   class="px-3 py-1.5 bg-white hover:bg-blue-600 hover:text-white text-slate-700 rounded-lg shadow-sm transition-all flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+                    Pekan Lalu
+                </a>
+
+                {{-- Indikator Posisi --}}
+                <span class="px-3 py-1.5 text-slate-700 font-black">
+                    @if(isset($weekOffset) && $weekOffset == 0)
+                        <span class="text-blue-600">Pekan Ini</span>
+                    @elseif(isset($weekOffset) && $weekOffset == -1)
+                        1 Mgg Lalu
+                    @else
+                        {{ abs($weekOffset ?? 0) }} Mgg Lalu
+                    @endif
+                </span>
+
+                {{-- Tombol Maju (Hanya bisa diklik kalau sedang berada di masa lalu) --}}
+                @if(isset($weekOffset) && $weekOffset < 0)
+                    <a href="{{ request()->fullUrlWithQuery(['pekan' => $weekOffset + 1]) }}" 
+                       class="px-3 py-1.5 bg-white hover:bg-blue-600 hover:text-white text-slate-700 rounded-lg shadow-sm transition-all flex items-center gap-1">
+                        Next
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                @else
+                    <span class="px-3 py-1.5 text-slate-300 cursor-not-allowed flex items-center gap-1">
+                        Next
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                    </span>
+                @endif
+
+                {{-- Tombol Quick Reset ke Pekan Ini --}}
+                @if(isset($weekOffset) && $weekOffset !== 0)
+                    <a href="{{ route('admin.dashboard') }}" class="ml-1 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 rounded-lg transition-all text-[11px]" title="Kembali ke minggu ini">
+                        Reset
+                    </a>
+                @endif
+
+            </div>
         </div>
 
         {{-- 2. WADAH GRAFIK --}}
@@ -284,7 +323,7 @@
         </div>
     </div>
 
-    {{-- SCRIPT PEMANGGIL CHART.JS (Modern Floating Capsule Edition) --}}
+    {{-- SCRIPT PEMANGGIL CHART.JS --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -311,7 +350,7 @@
                     hoverBackgroundColor: 'rgba(30, 64, 175, 1)',
                     borderColor: 'rgba(37, 99, 235, 1)',
                     borderWidth: 0,
-                    borderRadius: 12, 
+                    borderRadius: 5, 
                     borderSkipped: false, 
                     barThickness: 34
                 }]

@@ -41,40 +41,56 @@ class AdminController extends Controller
         $allBookings = Booking::all(); 
 
         // ====================================================================
-        // 🔥 REVISI ENGINE GRAFIK: 7 HARI TERAKHIR (CONTINUOUS ZERO-FILL)
+        // 🔥 ULTIMATE CHART ENGINE: SENIN - MINGGU DENGAN MESIN WAKTU (PEKAN)
         // ====================================================================
-        // 1. Buat kerangka 7 hari terakhir ke belakang (walaupun transaksinya 0)
-        $last7Days = collect();
-        for ($i = 6; $i >= 0; $i--) {
-            $dateStr = Carbon::now('Asia/Jakarta')->subDays($i)->toDateString();
-            $last7Days[$dateStr] = 0; // Default isi Rp0
+        // 1. Tangkap parameter '?pekan=-1' dari URL (Default 0 alias pekan ini)
+        $weekOffset = (int) $request->get('pekan', 0);
+
+        // 2. Kunci titik hari Senin 00:00 & Minggu 23:59 sesuai offset pekan
+        $startOfWeek = Carbon::now('Asia/Jakarta')->addWeeks($weekOffset)->startOfWeek(Carbon::MONDAY);
+        $endOfWeek   = Carbon::now('Asia/Jakarta')->addWeeks($weekOffset)->endOfWeek(Carbon::SUNDAY);
+
+        // Subtitle Cantik di UI (Contoh: "22 Jun 2026 — 28 Jun 2026")
+        $periodeLabel = $startOfWeek->translatedFormat('d M Y') . ' — ' . $endOfWeek->translatedFormat('d M Y');
+
+        // 3. Buat kerangka 7 hari mutlak dari Senin s/d Minggu
+        $weeklyCashflow = collect();
+        $currentDay = $startOfWeek->copy();
+
+        for ($i = 0; $i < 7; $i++) {
+            $dateStr = $currentDay->toDateString();
+            // Menghasilkan teks sumbu X: "Sen, 22 Jun"
+            $labelStr = $currentDay->locale('id')->isoFormat('ddd, D MMM'); 
+            
+            $weeklyCashflow[$dateStr] = [
+                'label' => $labelStr,
+                'total' => 0
+            ];
+            $currentDay->addDay();
         }
 
-        // 2. Tarik data asli dari MySQL
+        // 4. Tarik data database khusus rentang Senin - Minggu pada pekan tersebut
         $pendapatanDB = Booking::where('status', 'Selesai')
-            ->where('updated_at', '>=', Carbon::now('Asia/Jakarta')->subDays(6)->startOfDay())
+            ->whereBetween('updated_at', [$startOfWeek->startOfDay(), $endOfWeek->endOfDay()])
             ->selectRaw('DATE(updated_at) as tanggal, SUM(total_price) as total')
             ->groupBy('tanggal')
             ->pluck('total', 'tanggal');
 
-        // 3. Timpa angka Rp0 dengan total pendapatan asli jika harinya ada transaksi
+        // 5. Timpa laci Rp0 dengan pendapatan asli jika harinya ada transaksi
         foreach ($pendapatanDB as $tgl => $total) {
-            if (isset($last7Days[$tgl])) {
-                $last7Days[$tgl] = $total;
+            if (isset($weeklyCashflow[$tgl])) {
+                $weeklyCashflow[$tgl]['total'] = $total;
             }
         }
 
-        $chartLabels = $last7Days->keys()->map(function($tgl) {
-            return Carbon::parse($tgl)->locale('id')->format('d M');
-        })->toArray();
-
-        $chartValues = $last7Days->values()->toArray();
+        $chartLabels = $weeklyCashflow->pluck('label')->toArray();
+        $chartValues = $weeklyCashflow->pluck('total')->toArray();
 
         // ====================================================================
-        // 📦 PENANDA POJOK KIRI BAWAH (MINGGU INI & BULAN INI)
+        // 📦 PENANDA KIRI BAWAH (TETAP MENGHITUNG MINGGU INI & BULAN INI SECARA LIVE)
         // ====================================================================
         $revenueThisWeek = Booking::where('status', 'Selesai')
-            ->whereBetween('updated_at', [Carbon::now('Asia/Jakarta')->startOfWeek(), Carbon::now('Asia/Jakarta')->endOfWeek()])
+            ->whereBetween('updated_at', [Carbon::now('Asia/Jakarta')->startOfWeek(Carbon::MONDAY), Carbon::now('Asia/Jakarta')->endOfWeek(Carbon::SUNDAY)])
             ->sum('total_price');
 
         $revenueThisMonth = Booking::where('status', 'Selesai')
@@ -82,11 +98,12 @@ class AdminController extends Controller
             ->whereMonth('updated_at', Carbon::now('Asia/Jakarta')->month)
             ->sum('total_price');
         // ====================================================================
-        
+
         return view('admin.dashboard', compact(
             'bookings', 'allBookings', 'isFiltered', 
             'chartLabels', 'chartValues', 
-            'revenueThisWeek', 'revenueThisMonth'
+            'revenueThisWeek', 'revenueThisMonth',
+            'weekOffset', 'periodeLabel' 
         ));
     }
 

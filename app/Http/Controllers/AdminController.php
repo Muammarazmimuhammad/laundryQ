@@ -79,7 +79,7 @@ class AdminController extends Controller
             $pesan = "Halo Kak *" . $booking->user->name . "* 🌊\n\n";
             $pesan .= "Cucianmu dengan resi *" . $booking->booking_code . "* sudah selesai, wangi, dan siap diambil ya!\n";
             $pesan .= "Total biaya: *Rp" . number_format($booking->total_price, 0, ',', '.') . "*.\n\n";
-            $pesan .= "Terima kasih telah menggunakan layanan LaundryQ Kelompok Kurma! 👕✨";
+            $pesan .= "Terima kasih telah menggunakan layanan LaundryQ 👕✨";
 
             $curl = curl_init();
             curl_setopt_array($curl, array(

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 // 1. RUTE PUBLIK
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/api/cek-slot', [BookingController::class, 'cekSlotRealtime'])->name('api.cekslot');
 
 // 2. RUTE GUEST (Hanya untuk yang belum login)
 Route::middleware('guest')->group(function () {
@@ -24,36 +25,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Dashboard Pelanggan (Menghitung 4 Statistik AdminLTE)
-    Route::get('/dashboard', function() {
-        $userId = Auth::id();
-        $user = Auth::user();
-        
-        $totalPesanan = Booking::where('user_id', $userId)->count();
-        $pesananSelesai = Booking::where('user_id', $userId)->where('status', 'Selesai')->count();
-        $pesananAktif = Booking::where('user_id', $userId)->where('status', '!=', 'Selesai')->count();
-        $totalPengeluaran = Booking::where('user_id', $userId)->sum('total_price');
-
-        return view('user.dashboard', compact('user', 'totalPesanan', 'pesananSelesai', 'pesananAktif', 'totalPengeluaran'));
-    })->name('user.dashboard');
-
-    // Fitur Pelanggan
-    Route::get('/pesanan-saya', [TrackingController::class, 'index'])->name('tracking.index');
-    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
-    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-
-    // 4. RUTE KHUSUS ADMIN
-    Route::middleware([IsAdmin::class])->group(function () {
-        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-        Route::post('/admin/booking/{id}', [AdminController::class, 'update'])->name('admin.booking.update');
-        Route::delete('/admin/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
-    });
-});
-
-// Halaman Riwayat Pesanan Admin
-Route::get('/admin/riwayat', [App\Http\Controllers\AdminController::class, 'riwayat'])->name('admin.riwayat');
-
-// Dashboard Pelanggan
+    // Dashboard Pelanggan (Sudah digabung & dimasukkan ke zona aman)
     Route::get('/dashboard', function() {
         $userId = Auth::id();
         $user = Auth::user();
@@ -84,5 +56,18 @@ Route::get('/admin/riwayat', [App\Http\Controllers\AdminController::class, 'riwa
         ));
     })->name('user.dashboard');
 
-    // Route untuk cek ketersediaan slot di Landing Page
-Route::get('/api/cek-slot', [App\Http\Controllers\BookingController::class, 'cekSlotRealtime'])->name('api.cekslot');
+    // Fitur Pelanggan
+    Route::get('/pesanan-saya', [TrackingController::class, 'index'])->name('tracking.index');
+    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
+    // 4. RUTE KHUSUS ADMIN
+    Route::middleware([IsAdmin::class])->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+        Route::post('/admin/booking/{id}', [AdminController::class, 'update'])->name('admin.booking.update');
+        Route::delete('/admin/booking/{id}', [BookingController::class, 'destroy'])->name('booking.destroy');
+        
+        // Halaman Riwayat Pesanan Admin (Sudah diamankan dari penyusup)
+        Route::get('/admin/riwayat', [AdminController::class, 'riwayat'])->name('admin.riwayat');
+    });
+});

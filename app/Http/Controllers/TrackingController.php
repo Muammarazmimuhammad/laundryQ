@@ -13,8 +13,8 @@ class TrackingController extends Controller
         // Ambil pesanan khusus milik user yang sedang login
         // Beserta relasi layanan, slot, dan urutkan riwayat log-nya
         $bookings = Booking::with(['service', 'slot', 'trackingLogs' => function($query) {
-            // Urutkan riwayat dari yang terbaru (ID terbesar) ke terlama
-            $query->orderBy('id', 'desc'); 
+            // Urutan riwayat berdasarkan waktu mesin (created_at), bukan ID
+            $query->orderBy('created_at', 'desc'); 
         }])
         ->where('user_id', Auth::id())
         ->orderBy('created_at', 'desc')

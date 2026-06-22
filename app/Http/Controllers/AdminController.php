@@ -41,24 +41,53 @@ class AdminController extends Controller
         $allBookings = Booking::all(); 
 
         // ====================================================================
-        // 🔥 FITUR BARU: ENGINE GRAFIK KEUANGAN (7 HARI TERAKHIR)
+        // 🔥 REVISI ENGINE GRAFIK: 7 HARI TERAKHIR (CONTINUOUS ZERO-FILL)
         // ====================================================================
-        $pendapatanHarian = Booking::where('status', 'Selesai')
+        // 1. Buat kerangka 7 hari terakhir ke belakang (walaupun transaksinya 0)
+        $last7Days = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $dateStr = Carbon::now('Asia/Jakarta')->subDays($i)->toDateString();
+            $last7Days[$dateStr] = 0; // Default isi Rp0
+        }
+
+        // 2. Tarik data asli dari MySQL
+        $pendapatanDB = Booking::where('status', 'Selesai')
+            ->where('updated_at', '>=', Carbon::now('Asia/Jakarta')->subDays(6)->startOfDay())
             ->selectRaw('DATE(updated_at) as tanggal, SUM(total_price) as total')
             ->groupBy('tanggal')
-            ->orderBy('tanggal', 'asc')
-            ->take(7)
-            ->get();
+            ->pluck('total', 'tanggal');
 
-        // Format tanggalnya jadi "22 Jun" pakai bahasa Indonesia
-        $chartLabels = $pendapatanHarian->pluck('tanggal')->map(function($tgl) {
+        // 3. Timpa angka Rp0 dengan total pendapatan asli jika harinya ada transaksi
+        foreach ($pendapatanDB as $tgl => $total) {
+            if (isset($last7Days[$tgl])) {
+                $last7Days[$tgl] = $total;
+            }
+        }
+
+        $chartLabels = $last7Days->keys()->map(function($tgl) {
             return Carbon::parse($tgl)->locale('id')->format('d M');
         })->toArray();
 
-        $chartValues = $pendapatanHarian->pluck('total')->toArray();
+        $chartValues = $last7Days->values()->toArray();
+
+        // ====================================================================
+        // 📦 PENANDA POJOK KIRI BAWAH (MINGGU INI & BULAN INI)
+        // ====================================================================
+        $revenueThisWeek = Booking::where('status', 'Selesai')
+            ->whereBetween('updated_at', [Carbon::now('Asia/Jakarta')->startOfWeek(), Carbon::now('Asia/Jakarta')->endOfWeek()])
+            ->sum('total_price');
+
+        $revenueThisMonth = Booking::where('status', 'Selesai')
+            ->whereYear('updated_at', Carbon::now('Asia/Jakarta')->year)
+            ->whereMonth('updated_at', Carbon::now('Asia/Jakarta')->month)
+            ->sum('total_price');
         // ====================================================================
         
-        return view('admin.dashboard', compact('bookings', 'allBookings', 'isFiltered', 'chartLabels', 'chartValues'));
+        return view('admin.dashboard', compact(
+            'bookings', 'allBookings', 'isFiltered', 
+            'chartLabels', 'chartValues', 
+            'revenueThisWeek', 'revenueThisMonth'
+        ));
     }
 
     // Memperbarui Status, Berat, dan Harga

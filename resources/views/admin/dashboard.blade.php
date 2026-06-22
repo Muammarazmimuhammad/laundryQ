@@ -89,23 +89,51 @@
 
     </div>
 
-    {{-- ===== KANVAS GRAFIK FINANCIAL ANALYTICS ===== --}}
+    {{-- ===== KANVAS GRAFIK FINANCIAL ANALYTICS (MODERN UI) ===== --}}
     <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-8">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6">
-            <div>
-                <h2 class="text-lg font-black text-slate-800 tracking-tight">📊 Tren Pendapatan Arus Kas</h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Proyeksi pertumbuhan omzet harian menuju Break Even Point (BEP)</p>
+        
+        {{-- 1. HEADER GRAFIK --}}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-slate-800 tracking-tight">Tren Pendapatan Arus Kas</h2>
+                    <p class="text-xs font-medium text-slate-400 mt-0.5">Proyeksi pertumbuhan omzet harian menuju Break Even Point (BEP)</p>
+                </div>
             </div>
-            <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-[11px] font-black px-3 py-1 rounded-full border border-emerald-100">
+
+            <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 text-[11px] font-black px-3 py-1 rounded-full border border-emerald-100 shrink-0">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 Chart.js Engine
             </span>
         </div>
 
-        <!-- Wadah Grafik -->
-        <div class="w-full h-72">
+        {{-- 2. WADAH GRAFIK --}}
+        <div class="w-full h-72 mb-6">
             <canvas id="laundryCashflowChart"></canvas>
         </div>
+
+        {{-- 3. PENANDA POJOK KIRI BAWAH (REKAP MINGGUAN & BULANAN) --}}
+        <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-start gap-4 sm:gap-6">
+            <div class="flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100/80 transition-all">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-blue-100"></div>
+                <div>
+                    <p class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Minggu Ini</p>
+                    <p class="text-sm font-black text-slate-800">Rp{{ number_format($revenueThisWeek ?? 0, 0, ',', '.') }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100/80 transition-all">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></div>
+                <div>
+                    <p class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Bulan Ini</p>
+                    <p class="text-sm font-black text-slate-800">Rp{{ number_format($revenueThisMonth ?? 0, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     {{-- ===== TABLE ===== --}}
@@ -256,25 +284,20 @@
         </div>
     </div>
 
-   {{-- SCRIPT PEMANGGIL CHART.JS (Versi Ramah Linter VS Code) --}}
+    {{-- SCRIPT PEMANGGIL CHART.JS (Modern Floating Capsule Edition) --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Kita bungkus pakai petik satu biar VS Code mengira ini cuma teks String biasa
         const rawLabels = '@json($chartLabels)';
         const rawValues = '@json($chartValues)';
 
-        let dbLabels = [];
-        let dbValues = [];
+        let labels = [];
+        let values = [];
 
         try {
-            dbLabels = JSON.parse(rawLabels);
-            dbValues = JSON.parse(rawValues);
+            labels = JSON.parse(rawLabels);
+            values = JSON.parse(rawValues);
         } catch(e) {}
-
-        // FALLBACK CERDAS: Jika pesanan 'Selesai' di database baru ada 0 atau 1, pakai data simulasi
-        const labels = dbLabels.length > 1 ? dbLabels : ['18 Jun', '19 Jun', '20 Jun', '21 Jun', '22 Jun'];
-        const values = dbValues.length > 1 ? dbValues : [120000, 195000, 160000, 240000, 310000];
 
         const ctx = document.getElementById('laundryCashflowChart').getContext('2d');
         new Chart(ctx, {
@@ -284,12 +307,13 @@
                 datasets: [{
                     label: 'Omzet Selesai (Rp)',
                     data: values,
-                    backgroundColor: 'rgba(37, 99, 235, 0.85)',
-                    hoverBackgroundColor: 'rgba(29, 78, 216, 1)',
-                    borderColor: 'rgb(37, 99, 235)',
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    barThickness: 28
+                    backgroundColor: 'rgba(37, 99, 235, 0.9)', 
+                    hoverBackgroundColor: 'rgba(30, 64, 175, 1)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    borderWidth: 0,
+                    borderRadius: 12, 
+                    borderSkipped: false, 
+                    barThickness: 34
                 }]
             },
             options: {
@@ -298,6 +322,9 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        padding: 12,
+                        cornerRadius: 12,
                         callbacks: {
                             label: function(context) {
                                 return ' Pendapatan: Rp ' + context.parsed.y.toLocaleString('id-ID');
@@ -309,14 +336,19 @@
                     y: {
                         beginAtZero: true,
                         grid: { color: '#f8fafc' },
+                        border: { dash: [5, 5] },
                         ticks: {
                             callback: function(value) { return 'Rp ' + value.toLocaleString('id-ID'); },
-                            font: { size: 10, weight: 'bold' }
+                            font: { size: 10, weight: '700' },
+                            color: '#94a3b8'
                         }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 11, weight: 'bold' } }
+                        ticks: { 
+                            font: { size: 11, weight: '700' },
+                            color: '#64748b' 
+                        }
                     }
                 }
             }
